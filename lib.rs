@@ -48,8 +48,22 @@ mod incrementer {
 
         #[ink(message)]
         pub fn get_mine(&self) -> i32 {
-            let caller = Self::env().caller();
+            let caller = self.env().caller();
             self.my_map.get(&caller).unwrap_or_default()
+        }
+
+        #[ink(message)]
+        pub fn inc_mine(&mut self, by: i32) {
+            let caller = self.env().caller();
+            let mut mine = self.get_mine();
+            mine += by;
+            self.my_map.insert(&caller, &mine);
+        }
+
+        #[ink(message)]
+        pub fn remove_mine(&mut self) {
+            let caller = self.env().caller();
+            self.my_map.remove(&caller);
         }
     }
 
@@ -83,6 +97,34 @@ mod incrementer {
             assert_eq!(incrementer.get(), 11);
             incrementer.increment(3);
             assert_eq!(incrementer.get(), 14);
+            assert_eq!(incrementer.get_mine(), 0);
+        }
+
+        #[ink::test]
+        fn inc_mine_works() {
+            let mut incrementer = Incrementer::new(11);
+            assert_eq!(incrementer.get(), 11);
+            incrementer.increment(3);
+            assert_eq!(incrementer.get(), 14);
+            assert_eq!(incrementer.get_mine(), 0);
+            incrementer.inc_mine(1);
+            assert_eq!(incrementer.get_mine(), 1);
+            incrementer.inc_mine(2);
+            assert_eq!(incrementer.get_mine(), 3);
+        }
+
+        #[ink::test]
+        fn remove_mine_works() {
+            let mut incrementer = Incrementer::new(11);
+            assert_eq!(incrementer.get(), 11);
+            incrementer.increment(3);
+            assert_eq!(incrementer.get(), 14);
+            assert_eq!(incrementer.get_mine(), 0);
+            incrementer.inc_mine(1);
+            assert_eq!(incrementer.get_mine(), 1);
+            incrementer.inc_mine(2);
+            assert_eq!(incrementer.get_mine(), 3);
+            incrementer.remove_mine();
             assert_eq!(incrementer.get_mine(), 0);
         }
     }
