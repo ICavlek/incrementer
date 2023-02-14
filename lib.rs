@@ -9,13 +9,13 @@ mod incrementer {
     #[ink(storage)]
     pub struct Incrementer {
         /// Stores a single `bool` value on the storage.
-        value: bool,
+        value: i32,
     }
 
     impl Incrementer {
         /// Constructor that initializes the `bool` value to the given `init_value`.
         #[ink(constructor)]
-        pub fn new(init_value: bool) -> Self {
+        pub fn new(init_value: i32) -> Self {
             Self { value: init_value }
         }
 
@@ -31,13 +31,13 @@ mod incrementer {
         /// This one flips the value of the stored `bool` from `true`
         /// to `false` and vice versa.
         #[ink(message)]
-        pub fn flip(&mut self) {
-            self.value = !self.value;
+        pub fn increment(&mut self, by: i32) {
+            self.value += by;
         }
 
         /// Simply returns the current value of our `bool`.
         #[ink(message)]
-        pub fn get(&self) -> bool {
+        pub fn get(&self) -> i32 {
             self.value
         }
     }
@@ -54,16 +54,16 @@ mod incrementer {
         #[ink::test]
         fn default_works() {
             let incrementer = Incrementer::default();
-            assert_eq!(incrementer.get(), false);
+            assert_eq!(incrementer.get(), 0);
         }
 
         /// We test a simple use case of our contract.
         #[ink::test]
         fn it_works() {
-            let mut incrementer = Incrementer::new(false);
-            assert_eq!(incrementer.get(), false);
-            incrementer.flip();
-            assert_eq!(incrementer.get(), true);
+            let mut incrementer = Incrementer::new(Default::default());
+            assert_eq!(incrementer.get(), 0);
+            incrementer.increment(1);
+            assert_eq!(incrementer.get(), 1);
         }
     }
 }
